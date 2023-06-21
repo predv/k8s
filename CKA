@@ -23,3 +23,6 @@ Nodes:
   Что может Kubernetes и почему он популярен
   1. Service discovery and load balancing: создает через IP адрес с определенным портом или DNS имя, и балансирует подключение внутри кластера.
   2. Storage orchestraion:
+---------------------------------------------------------
+
+API SERVER  -  Authenticare User(), Validate Request(проверка запроса), Retrieve Data(извлечение данных), Update ETCD, Scheduler, Kubelet
