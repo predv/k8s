@@ -25,4 +25,32 @@ Nodes:
   2. Storage orchestraion:
 ---------------------------------------------------------
 
-API SERVER  -  Authenticare User(), Validate Request(проверка запроса), Retrieve Data(извлечение данных), Update ETCD, Scheduler, Kubelet
+API SERVER  -   Authenticare User(),
+                Validate Request(проверка запроса),
+                Retrieve Data(извлечение данных),
+                Update ETCD,
+                Scheduler,
+                Kubelet
+/etc/kubernetes/manifests/kube-apiserver.yaml
+/etc/systemd/system/kube-apiserver.service
+ps -ax | grep kube-apiserver
+
+Controllers  -  Watch status,
+                Remediate Situation
+                Node Monitor Period = 5s
+                Node Monitor Grace Period = 40s
+                POD Eviction Timeout = 5min
+/etc/kubernetes/manifests/kube-controller-manager.yaml
+/etc/systemd/system/kube-controller-manager.yaml
+ps -ax | grep kube-controller-manager
+
+KUBE SCHEDULER -  Логист распределения задач
+/etc/kubernetes/manifests/kube-scheduler.yaml
+
+KUBELET    -  ответственный за NODE
+              Register Node
+              Create PODs
+              Monitoring Node & PODs
+/etc/kubernetes/kublete.conf
+ps -ax | grep kubelete
+
