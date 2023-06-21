@@ -151,5 +151,30 @@ kubectr create -f Файл.yml
 kubectr get replicaset
 kubectr delete replicaset myapp-replicaset
 kubectr replace -f Файл.yml
-kubectr scale --replicas=6 replicaset myapp-replicaset
+kubectr scale --replicas=6 replicaset myapp-replicaset - увеличение кол-во PODs
+kubectl deployment - развертывание
+kubectl get all - отображение всех объектов за один раз
 
+Deployment Деплоймент:
+apiVersion: apps/v1
+kund: **Deployment**
+metadata: 
+  name: myapp-deloyment
+  labels:
+    app: myapp
+    type: frond-end
+spec:
+  template:
+    metadata:
+      name: myapp-pod
+      labels: 
+        app: myapp
+        type: front-end
+    spec:
+      containers:
+      - name: nginx-container
+        image: nginx
+  replicas: 3
+  selector:
+    matchLabels:
+      type: front-end
