@@ -84,7 +84,7 @@ kubectl describe pod (имя POD)
 
 Replication controller
 apiVersion: v1
-kund: ReplicationController
+kind: ReplicationController
 metadata: 
   name: myapp-rc
   labels:
@@ -108,7 +108,7 @@ spec:
 
 Replica SET
 apiVersion: apps/v1
-kund: ReplicaSet
+kind: ReplicaSet
 metadata: 
   name: myapp-rc
   labels:
@@ -146,18 +146,23 @@ kubctl scale --replicas=6 -f replicaset-definition.yml
 Динамический вариант:
 kubctl scale --replicas=6 replicaset myapp-replicaset
 
-Команды:
-kubectr create -f Файл.yml
-kubectr get replicaset
-kubectr delete replicaset myapp-replicaset
-kubectr replace -f Файл.yml
-kubectr scale --replicas=6 replicaset myapp-replicaset - увеличение кол-во PODs
-kubectl deployment - развертывание
-kubectl get all - отображение всех объектов за один раз
-
+> Команды:
+> kubectr create -f Файл.yml
+> kubectr get replicaset
+> kubectr delete replicaset myapp-replicaset
+> kubectr replace -f Файл.yml
+> kubectr scale --replicas=6 replicaset myapp-replicaset - увеличение кол-во PODs
+> kubectl deployment - развертывание
+> kubectl get all - отображение всех объектов за один раз
+> kubectl get pods --namespace=kube-system - просмотр PODs в другом пространстве
+> kubectl create -f (файл).yml --namespace=dev - создание POD в другом пространстве имен
+> kubectl config set-context $(kubectl config current-context) --namespace=dev
+> kubectl get pods --all-namespaces
+> kubectl get pods --A
+-----------------------------------------------------------
 Deployment Деплоймент:
 apiVersion: apps/v1
-kund: **Deployment**
+kind: Deployment
 metadata: 
   name: myapp-deloyment
   labels:
@@ -178,3 +183,54 @@ spec:
   selector:
     matchLabels:
       type: front-end
+---------------------------------------------------------------
+NAMESPACE пространство имен:
+default      -  
+kube-system  -  пространство для системных компонентов
+kube-public  -  ресурсы для всех 
+можно создавать пространства и выделать квоты на использование ресурсов
+опимание адресной ссылки на ресурсы db-service(название сервиса).dev(название пространства).svc(поддомен для сервиса).cluster.local(название домена)
+В описание файл .yml в разделе  metadata:        добавляется параметр namespace: dev с указание имени пространства
+                                  namespace: dev  
+Создание NAMESPACE пространства имен:
+namespace-dev.yml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev
+> kubectl create -f namespace-dev.yml
+> kubectl create namespace dev
+Как переключаться между пространствами:
+> kubectl config set-context $(kubectl config current-context) --namespace=dev
+Квоты ресурсов:
+compute-quota.yml
+apiVersion: v1
+kind: ResourseQuota
+metadata: 
+  name: compute-quota
+  namespace: dev
+spec:
+  hard:
+    pods: "10"
+    requests.cpu: "4"
+    requests.memory: 5Gi
+    limits.cpu: "10"
+    limits.memory: 10Gi
+------------------------------------------------------------
+
+SERVICE службы:
+NodePort  -  TargetPort - конечная цель запроса, целевой порт; Port - середина пути; NodePort - начало запроса, диапазон 30000-32767
+ClusterIP  -  
+LoadBalancer  -
+
+NodePort:
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-service
+spec:
+  type: NodePort
+  ports:
+  -  targetPort: 80
+     port: 80
+     nodePort: 30008
