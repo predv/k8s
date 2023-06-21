@@ -53,4 +53,103 @@ KUBELET    -  ответственный за NODE
               Monitoring Node & PODs
 /etc/kubernetes/kublete.conf
 ps -ax | grep kubelete
+УСТАНАВЛИВАЕТСЯ ВСЕГДА ОТДЕЛЬНО БЕЗ 
+
+KUBE PROXY  -   POD NETWORK
+
+PODs        -  kubctl run nginx - создание PODs из реопзитория или из приватного github
+            -  kubctl get pods - полчить информацию о PODs
+  YAML: всегда содержит 4 поля
+  apiVersion: версия API kubernetes: v1, apps/v1
+  kind: тип объекта: Pod, Service, ReplicaSet, Deployment
+  metadata: данные об объекте:
+    name: myapp-pod
+    labels: 
+      app: myapp
+      type: front-end
+  spec:
+    containers:
+      name: nginx-container
+      image: nginx
+Команда для создания POD с контейнером: kubectl -f pod-definition.yml
+kubectl get pods
+kubectl describe pod (имя POD)
+
+Реплики
+Гарантированная поддержка в работе PODs и балансировка нагрузки на Node
+    Replication controller  -
+    Replica Set             -
+
+Создание контролера rc-definition.yml
+
+Replication controller
+apiVersion: v1
+kund: ReplicationController
+metadata: 
+  name: myapp-rc
+  labels:
+    app: myapp
+    type: frond-end
+spec:
+  template:
+    metadata:
+      name: myapp-pod
+      labels: 
+        app: myapp
+        type: front-end
+    spec:
+      containers:
+      - name: nginx-container
+        image: nginx
+  replicas: 3
+> kubectl create -f rc-definition.yml
+> kubectl get replicationcontroller
+> kubectl get pods
+
+Replica SET
+apiVersion: apps/v1
+kund: ReplicaSet
+metadata: 
+  name: myapp-rc
+  labels:
+    app: myapp
+    type: frond-end
+spec:
+  template:
+    metadata:
+      name: myapp-pod
+      labels: 
+        app: myapp
+        type: front-end
+    spec:
+      containers:
+      - name: nginx-container
+        image: nginx
+  replicas: 3
+  selector: (перечисление нужных PODs с помощью matchLabels)
+    matchLabels:
+      type: front-end
+
+Метки и селекторы:
+replicaSet использует selector:             metadata:для отслеживания их состояния
+                        matchLabels:          name: myapp-pod
+                          tier: front-end     labels:
+                                                tier: front-end
+Увеличение кол-во реплик, два варианта:
+Изменяем парметр replicas: 6 
+Вариант 1:
+вводим команду kubctl replace -f replicaset-definition.yml
+
+Вариант 2:
+kubctl scale --replicas=6 -f replicaset-definition.yml
+
+Динамический вариант:
+kubctl scale --replicas=6 replicaset myapp-replicaset
+
+Команды:
+kubectr create -f Файл.yml
+kubectr get replicaset
+kubectr delete replicaset myapp-replicaset
+kubectr replace -f Файл.yml
+kubectr scale --replicas=6 replicaset myapp-replicaset
 
