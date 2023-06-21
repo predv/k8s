@@ -159,6 +159,8 @@ kubctl scale --replicas=6 replicaset myapp-replicaset
 > kubectl config set-context $(kubectl config current-context) --namespace=dev
 > kubectl get pods --all-namespaces
 > kubectl get pods --A
+> kubectl get services  -  просмотр служб
+
 -----------------------------------------------------------
 Deployment Деплоймент:
 apiVersion: apps/v1
@@ -234,3 +236,38 @@ spec:
   -  targetPort: 80
      port: 80
      nodePort: 30008
+  selector:
+    app: myapp
+    type: front-end
+> kubectrl create -f service-definition.yml
+------------------------------------------------------------
+
+Служба ClusterIp
+Служба помогает сгрупировать PODs
+apiVersion: v1
+kind: Service
+metadata:
+  name: back-end
+spec:
+  type: ClusterIP
+  ports:
+    trgetPort: 80
+    port: 80
+selector:
+  app: myapp
+  type: back-end
+------------------------------------------------------------
+
+Служба LoadBalancer
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-service
+spec:
+  type: LoadBalancer
+  ports:
+    trgetPort: 80
+    port: 80
+    nodePort: 30008
+------------------------------------------------------------
+
