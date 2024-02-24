@@ -3,7 +3,7 @@
 Open SSH server  -  установка вместе с ОС
 
 Предварительные действия
-1. cat <<EOF | tee /etc/netplan/00-installer-config.yaml
+cat <<EOF | tee /etc/netplan/00-installer-config.yaml
 network:
   ethernets:
     enp0s3:
@@ -19,14 +19,16 @@ network:
   version: 2
 EOF
 
-3. netplan apply
-8. hostnamectl set-hostname node1.local
-9. /etc/resolv.conf добавляем DNS server
+netplan apply
+
+hostnamectl set-hostname node1.local
+
+/etc/resolv.conf добавляем DNS server
 cat >> /etc/resolv.conf
 nameserver 192.168.101.1
 EOF
 
-10. Добавление имен в /etc/hosts
+Добавление имен в /etc/hosts
 cat <<EOF | tee /etc/hosts
 127.0.0.1  localhost
 # k8s cluster nodes
