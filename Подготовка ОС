@@ -59,10 +59,13 @@ iptables -t mangle -L -n
 iptables -t raw -L -n 
 
     Настроить параметры ядра
-modprobe br_netfilter
+
+sudo modprobe overlay
+sudo modprobe br_netfilter
 
     атем добавьте файл /etc/modules-load.d/modules-kubernetes.conf:
-cat <<EOF | tee /etc/modules-load.d/modules-kubernetes.conf
+cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
+overlay
 br_netfilter
 EOF
 
@@ -75,18 +78,34 @@ EOF
 -----------------------------
     Установка приложений
 
-    Добавляем репозиторий kubernetes. Для этого создаём файл /etc/yum.repos.d/kubernetes.repo:
-cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
-[kubernetes]
-async = 1
-enabled=1
-baseurl = https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
-gpgcheck = 1
-gpgkey = https://packages.cloud.google.com/yum/doc/yum-key.gpg
-        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-name = Base programs for k8s
+    Ссылка на установку для Debian (https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)
+
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl gpg
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+---------------------
+    Подготовка для установки containerd
+(https://kubernetes.io/docs/setup/production-environment/container-runtimes/)
+
+cat <<EOF | tee /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward                 = 1
 EOF
 
+sudo sysctl --system
+
+Убедитесь, что br_netfilterмодули overlayзагружены, выполнив следующие команды:
+
+lsmod | grep br_netfilter
+lsmod | grep overlay
+
+Убедитесь, что системные переменные net.bridge.bridge-nf-call-iptables, net.bridge.bridge-nf-call-ip6tablesи в вашей конфигурации net.ipv4.ip_forwardустановлены , выполнив следующую команду:1sysctl
+
+sysctl net.bridge.bridge-nf-call-iptables net.bridge.bridge-nf-call-ip6tables net.ipv4.ip_forward
+
+--------------
     Обязательные:
 apt install -y bash-completion python3 tar containerd nfs-utils chrony kubectl kubelet kubeadm
 
@@ -96,18 +115,15 @@ tar
 containerd
 nfs-utils
 chrony
-kubectl
-kubelet
-kubeadm
+sudo apt-get install -y kubelet kubeadm kubectl
+
 
     Не обязательные:
-apt install -y mc nano ping git rsyslog
-
-mc
-nano
-ping
-git
-rsyslog
+apt install -y mc
+apt install -y nano
+apt install -y iputils-ping
+apt install -y git
+apt install -y rsyslog
 ----------------------------
     Запуск необходимых сервисов
     NTP
@@ -135,13 +151,15 @@ systemctl status containerd
 
 Добавим конфигурационный файл /etc/crictl.yaml для приложения управления контейнерами crictl:
 
-runtime-endpoint: "unix:///run/containerd/containerd.sock"
-image-endpoint: "unix:///run/containerd/containerd.sock"
-timeout: 0
-debug: false
+cat <<EOF | tee /etc/crictl.yaml
+runtime-endpoint: unix:///run/containerd/containerd.sock
+image-endpoint: unix:///run/containerd/containerd.sock
+timeout: 2
+debug: true
 pull-image-on-create: false
-disable-pull-on-run: false
-Проверим работоспособность утилиты:
+EOF
+
+    Проверим работоспособность утилиты:
 
 crictl images
 crictl ps -a
