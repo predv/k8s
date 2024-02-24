@@ -2,8 +2,8 @@
 
 Open SSH server  -  установка вместе с ОС
 
-## Предварительные действия
-2. cat > /etc/netplan/00-installer-config.yaml
+Предварительные действия
+1. cat <<EOF | tee /etc/netplan/00-installer-config.yaml
 network:
   ethernets:
     enp0s3:
@@ -17,9 +17,129 @@ network:
         addresses:
           - 192.168.101.1
   version: 2
-3. netplan apply
-4. apt update
-5. apt install iputils-ping
-6. apt install rsyslog
-7. apt install mc
+EOF
 
+3. netplan apply
+8. hostnamectl set-hostname node1.local
+9. /etc/resolv.conf добавляем DNS server
+cat >> /etc/resolv.conf
+nameserver 192.168.101.1
+EOF
+
+10. Добавление имен в /etc/hosts
+cat <<EOF | tee /etc/hosts
+127.0.0.1  localhost
+# k8s cluster nodes
+192.168.101.101  node1.local
+192.168.101.102  node1.local
+192.168.101.103  node1.local
+EOF
+----------------------------
+    На всех машинах, где будет установлен кластер kubernetes, необходимо:
+
+Отключить swap.
+Отключить firewall.
+Отключить selinux.
+Настроить параметры ядра.
+Установить приложения.
+
+    В файле /etc/fstab закоментируйте строку, определяющую подключение swap пространства.
+swapoff -a
+
+    Отключить firewall
+systemctl stop firewalld
+systemctl disable firewalld
+
+    Убедитесь, что в фаерволе нет правил и установлены политики по умолчанию ACCEPT:
+iptables -L -n
+iptables -t nat -L -n
+iptables -t mangle -L -n
+iptables -t raw -L -n 
+
+    Настроить параметры ядра
+modprobe br_netfilter
+
+    атем добавьте файл /etc/modules-load.d/modules-kubernetes.conf:
+cat <<EOF | tee /etc/modules-load.d/modules-kubernetes.conf
+br_netfilter
+EOF
+
+    В файл /etc/sysctl.conf добавтье следующие строки:
+cat >> /etc/sysctl.conf
+net.ipv4.ip_forward=1
+net.bridge.bridge-nf-call-iptables=1
+net.ipv4.ip_nonlocal_bind=1
+EOF
+-----------------------------
+    Установка приложений
+
+    Добавляем репозиторий kubernetes. Для этого создаём файл /etc/yum.repos.d/kubernetes.repo:
+cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+async = 1
+enabled=1
+baseurl = https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+gpgcheck = 1
+gpgkey = https://packages.cloud.google.com/yum/doc/yum-key.gpg
+        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+name = Base programs for k8s
+EOF
+
+    Обязательные:
+apt install -y bash-completion python3 tar containerd nfs-utils chrony kubectl kubelet kubeadm
+
+bash-completion
+python3
+tar
+containerd
+nfs-utils
+chrony
+kubectl
+kubelet
+kubeadm
+
+    Не обязательные:
+apt install -y mc nano ping git rsyslog
+
+mc
+nano
+ping
+git
+rsyslog
+----------------------------
+    Запуск необходимых сервисов
+    NTP
+Включаем NTP. Синхронизация времени на серверах кластера обязательна. Если её не включить возможны проблемы с сертификатами.
+
+systemctl enable chronyd
+systemctl start chronyd
+systemctl status chronyd
+
+    syslog
+Опционально включаем систему логирования rsyslog. Я предпочитаю смотреть текстовые логфайлы классического syslog, а не копаться в бинарниках systemd. Да и потом логи системы будет легче собирать.
+
+systemctl enable rsyslog
+systemctl start rsyslog
+systemctl status rsyslog
+
+  containerd
+(https://github.com/kubernetes-sigs/cri-tools/blob/master/docs/crictl.md) - ссылка на установку
+(https://kubernetes.io/docs/tasks/debug/debug-cluster/crictl/) - ссылка на дебаг  в кубернетес
+Система контейнеризации containerd.
+
+systemctl enable containerd
+systemctl start containerd
+systemctl status containerd
+
+Добавим конфигурационный файл /etc/crictl.yaml для приложения управления контейнерами crictl:
+
+runtime-endpoint: "unix:///run/containerd/containerd.sock"
+image-endpoint: "unix:///run/containerd/containerd.sock"
+timeout: 0
+debug: false
+pull-image-on-create: false
+disable-pull-on-run: false
+Проверим работоспособность утилиты:
+
+crictl images
+crictl ps -a
