@@ -24,7 +24,7 @@ netplan apply
 hostnamectl set-hostname node1.local
 
 /etc/resolv.conf добавляем DNS server
-cat >> /etc/resolv.conf
+cat <<EOF | tee /etc/resolv.conf
 nameserver 192.168.101.1
 EOF
 
@@ -70,7 +70,7 @@ br_netfilter
 EOF
 
     В файл /etc/sysctl.conf добавтье следующие строки:
-cat >> /etc/sysctl.conf
+cat <<EOF | tee /etc/sysctl.conf
 net.ipv4.ip_forward=1
 net.bridge.bridge-nf-call-iptables=1
 net.ipv4.ip_nonlocal_bind=1
