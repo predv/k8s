@@ -1,0 +1,96 @@
+Определение apiVersion версии:
+kubeadm config print init-defaults | grep apiVersion
+
+https://kubernetes.io/docs/reference/config-api/  -  описание версий
+------------------------------
+initConfiguration
+
+bootstrapTokens  - время жизни токена по которому можно будет добавлять кластеры и воркерноды, поумочанию это 24 часа.
+localAPIEndpoint  -  адрес и порт локальной машины по которой будет доступен кластер
+nodeRegistration:
+    name  -  имя ноды
+    criSocket  -  сокет для системы контейнерезации
+    imagePullPolicy  - выкачивывание образов заново или нет
+    taints  -  контроль запуска приложение на мастер ноде
+
+bootstrapTokens:
+- groups:
+  ttl: 24h0m0s
+localAPIEndpoint:
+  advertiseAddress: 192.168.101.101
+  bindPort: 6443
+nodeRegistration:
+  name: control1.domain.local
+  criSocket: "unix:///var/run/containerd/containerd.sock"
+  imagePullPolicy: IfNotPresent
+  taints:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/master
+
+https://kubernetes.io/docs/reference/config-api/kubeadm-config.v1beta3/#kubeadm-k8s-io-v1beta3-ClusterConfiguration
+------------------------------
+ClusterConfiguration
+
+certificatesDir  -  директория с сертификатами кластера
+clusterName  -  доменное имя кластера
+etcd  -  параметры БД, в дам случае путь места положения
+imageRepository  -  путь откуда будет скачиваться образы
+apiServer  -   задается сеть для срвисов кубернетиса и диапазон портов
+kubernetesVersion  -  версия которую будем ставить
+controlPlaneEndpoint  -  адрес взаимодействия с остальными kubeadm используя haproxy
+networking  -  снова имя кластера, сеть для подов и сеть для сервисов
+
+certificatesDir: /etc/kubernetes/pki
+clusterName: k8s-test.local
+etcd:
+  local:
+    dataDir: /var/lib/etcd
+imageRepository: "registry.k8s.io"
+apiServer:
+  extraArgs:
+    service-cluster-ip-range: "10.10.0.0/18"
+    service-node-port-range: 30000-32767
+kubernetesVersion: "1.25.4"
+controlPlaneEndpoint: 192.168.0.189:7443
+networking:
+  dnsDomain: cluster.local
+  podSubnet: "10.10.64.0/18"
+  serviceSubnet: "10.10.0.0/18"
+
+https://kubernetes.io/docs/reference/config-api/kubeadm-config.v1beta3/#kubeadm-k8s-io-v1beta3-ClusterConfiguration
+------------------------------
+KubeProxyConfiguration:
+
+clusterCIDR  -  сеть используемая подами
+mode  -  механиз для прокси
+    ipvs  -  самый быстрый и лучшива вариант
+        strictARP  -  нужный вариант для использования metallb
+
+clusterCIDR: "10.10.64.0/18"
+mode: ipvs
+ipvs:
+  strictARP: True
+
+https://kubernetes.io/docs/reference/config-api/kube-proxy-config.v1alpha1/
+------------------------------
+KubeletConfiguration
+
+clusterDNS  -  кеширующий ДНС
+- 169.254.25.10  -  адрес для ДНС
+systemReserved  -  параметры для резервации ресурсов для ОС
+containerLogMaxSize  -  максимальный размер лог с контейнеров
+containerLogMaxFiles  -  количество повторов данного файла
+
+clusterDNS:
+- 169.254.25.10
+systemReserved:
+  memory: 512Mi
+  cpu: 500m
+  ephemeral-storage: 2Gi
+# Default: "10Mi"
+containerLogMaxSize: 1Mi
+# Default: 5
+containerLogMaxFiles: 3
+
+https://kubernetes.io/docs/reference/config-api/kubelet-config.v1beta1/
+------------------------------
