@@ -109,13 +109,13 @@ sysctl net.bridge.bridge-nf-call-iptables net.bridge.bridge-nf-call-ip6tables ne
     Обязательные:
 apt install -y bash-completion python3 tar containerd nfs-utils chrony kubectl kubelet kubeadm
 
-bash-completion
-python3
-tar
-containerd
-nfs-utils
-chrony
-sudo apt-get install -y kubelet kubeadm kubectl
+apt install -y bash-completion
+apt install -y python3
+apt install -y tar
+apt install -y containerd
+apt install -y nfs-utils
+apt install -y chrony
+apt install -y kubelet kubeadm kubectl
 
 
     Не обязательные:
