@@ -78,13 +78,6 @@ EOF
 -----------------------------
     Установка приложений
 
-    Ссылка на установку для Debian (https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)
-
-sudo apt-get update
-sudo apt-get install -y apt-transport-https ca-certificates curl gpg
-curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
----------------------
     Подготовка для установки containerd
 (https://kubernetes.io/docs/setup/production-environment/container-runtimes/)
 
@@ -109,13 +102,21 @@ sysctl net.bridge.bridge-nf-call-iptables net.bridge.bridge-nf-call-ip6tables ne
     Обязательные:
 apt install -y bash-completion python3 tar containerd nfs-utils chrony kubectl kubelet kubeadm
 
-apt install -y bash-completion
-apt install -y python3
-apt install -y tar
-apt install -y containerd
-apt install -y nfs-utils
-apt install -y chrony
-apt install -y kubelet kubeadm kubectl
+    Ссылка на установку для Debian (https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)
+
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl gpg
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo apt-get update
+
+apt-get install -y bash-completion
+apt-get install -y python3
+apt-get install -y tar
+apt-get install -y containerd
+apt-get install -y nfs-utils
+apt-get install -y chrony
+apt-get install -y kubelet kubeadm kubectl
 
 
     Не обязательные:
