@@ -100,7 +100,7 @@ sysctl net.bridge.bridge-nf-call-iptables net.bridge.bridge-nf-call-ip6tables ne
 
 --------------
     Обязательные:
-apt install -y bash-completion python3 tar containerd nfs-utils chrony kubectl kubelet kubeadm
+bash-completion python3 tar containerd nfs-utils chrony kubectl kubelet kubeadm
 
     Ссылка на установку для Debian (https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)
 
@@ -120,11 +120,11 @@ apt-get install -y kubelet kubeadm kubectl
 
 
     Не обязательные:
-apt install -y mc
-apt install -y nano
-apt install -y iputils-ping
-apt install -y git
-apt install -y rsyslog
+apt-get install -y mc
+apt-get install -y nano
+apt-get install -y iputils-ping
+apt-get install -y git
+apt-get install -y rsyslog
 ----------------------------
     Запуск необходимых сервисов
     NTP
