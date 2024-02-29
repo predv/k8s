@@ -33,8 +33,11 @@ cat <<EOF | tee /etc/hosts
 127.0.0.1  localhost
 # k8s cluster nodes
 192.168.101.101  node1.local
+192.168.101.101  node1
 192.168.101.102  node2.local
+192.168.101.102  node2
 192.168.101.103  node3.local
+192.168.101.103  node3
 EOF
 ----------------------------
     На всех машинах, где будет установлен кластер kubernetes, необходимо:
